@@ -1,25 +1,59 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useEffect, useState } from 'react';
 import './App.css';
 
+import employeesMock from './misc/employeesMock.json';
+import { EmployeeCard } from './components/EmployeeCard';
+import { AuthForm } from './components/AuthForm';
+import { EmployeeDto } from './common/dto/EmployeeDto';
+import { useAuth } from './contexts/AuthContext';
+import customersApi from './common/api/CustomersApi';
+
 function App() {
+  const [employees, setEmployees] = useState<EmployeeDto[]>([]);
+  const { isLoggedIn, login, logout } = useAuth();
+
+  useEffect(() => {
+    setEmployees(employeesMock as EmployeeDto[]);
+  }, []);
+
+  const removeEmployee = (id: number) => {
+    setEmployees(employees.filter(e => e.id !== id));
+  };
+
+  const loadCustomers = () => {
+    customersApi.getAll();
+  }
+ 
+  if (!isLoggedIn) {
+    return <AuthForm onLogin={login} />;
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+    <>
+      <header>
+        <nav>
+          Navigation
+        </nav>
+
+        <button onClick={logout}>Logout</button>
       </header>
-    </div>
+
+      <main>
+        <button onClick={loadCustomers}>Load Customers</button>
+
+        <div>
+          {employees.map(employee => (
+            <EmployeeCard 
+              key={employee.id}
+              onClick={() => removeEmployee(employee.id)}
+              fullName={employee.fullName} 
+              photo={employee.photo} />
+          ))}
+
+          {!employees.length && 'Список пуст'}
+        </div>
+      </main>
+    </>
   );
 }
 
