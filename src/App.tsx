@@ -1,57 +1,35 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
+import { Outlet, Link, Navigate } from 'react-router-dom';
 import './App.css';
 
-import employeesMock from './misc/employeesMock.json';
-import { EmployeeCard } from './components/EmployeeCard';
-import { AuthForm } from './components/AuthForm';
-import { EmployeeDto } from './common/dto/EmployeeDto';
 import { useAuth } from './contexts/AuthContext';
-import customersApi from './common/api/CustomersApi';
 
 function App() {
-  const [employees, setEmployees] = useState<EmployeeDto[]>([]);
-  const { isLoggedIn, login, logout } = useAuth();
+  const { isLoggedIn, logout, checkAuth } = useAuth();
 
   useEffect(() => {
-    setEmployees(employeesMock as EmployeeDto[]);
+    checkAuth();
   }, []);
 
-  const removeEmployee = (id: number) => {
-    setEmployees(employees.filter(e => e.id !== id));
-  };
-
-  const loadCustomers = () => {
-    customersApi.getAll();
-  }
- 
   if (!isLoggedIn) {
-    return <AuthForm onLogin={login} />;
+    return <Navigate to="/login" />;
   }
 
   return (
     <>
       <header>
         <nav>
-          Navigation
+          <ul>
+            <li><Link to="/">Заявки</Link></li>
+            <li><Link to="/employees">Сотрудники</Link></li>
+          </ul>
         </nav>
 
         <button onClick={logout}>Logout</button>
       </header>
 
       <main>
-        <button onClick={loadCustomers}>Load Customers</button>
-
-        <div>
-          {employees.map(employee => (
-            <EmployeeCard 
-              key={employee.id}
-              onClick={() => removeEmployee(employee.id)}
-              fullName={employee.fullName} 
-              photo={employee.photo} />
-          ))}
-
-          {!employees.length && 'Список пуст'}
-        </div>
+        <Outlet />
       </main>
     </>
   );

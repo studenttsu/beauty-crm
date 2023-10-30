@@ -9,6 +9,10 @@ class AppService extends HttpService {
     login(authData: AuthData): Promise<TokenDto> {
         return this.post('login', authData);
     }
+
+    refresh(): Promise<TokenDto> {
+        return this.get('refresh');
+    }
 }
 
 const appService = new AppService();
